@@ -1,0 +1,4 @@
+[build]
+  publish = "."  # 현재 폴더를 배포한다는 뜻
+  functions = "netlify/functions"
+
