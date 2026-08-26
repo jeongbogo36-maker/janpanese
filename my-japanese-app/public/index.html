@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>J-MASTER PRO</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #4f46e5; --secondary: #6366f1; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; margin: 0; background: var(--bg); color: var(--text); padding-bottom: 80px; }
+        header { background: var(--card); padding: 15px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        header h1 { font-size: 1.2rem; margin: 0; color: var(--primary); font-weight: 800; }
+        .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #f1f5f9; }
+        .tab-menu { display: flex; background: #f1f5f9; padding: 5px; border-radius: 12px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; border: none; padding: 10px; border-radius: 8px; cursor: pointer; background: none; font-weight: 600; color: #64748b; }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .kana-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .kana-item { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px 5px; text-align: center; cursor: pointer; }
+        .kana-item .ja { font-size: 1.5rem; font-weight: 700; display: block; }
+        .kana-item .ko { font-size: 0.8rem; color: #94a3b8; display: block; }
+        .game-menu { display: flex; flex-direction: column; gap: 10px; }
+        .btn-game { background: white; border: 2px solid var(--primary); color: var(--primary); padding: 15px; border-radius: 15px; font-weight: 700; cursor: pointer; }
+        .btn-game:hover { background: var(--primary); color: white; }
+        .quiz-q { font-size: 4rem; text-align: center; margin: 40px 0; color: var(--primary); font-weight: 800; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .opt-btn { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; font-weight: 600; cursor: pointer; }
+        .opt-btn.correct { background: #22c55e; color: white; border-color: #22c55e; }
+        .opt-btn.wrong { background: #ef4444; color: white; border-color: #ef4444; }
+        .ai-input { width: 100%; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; font-size: 1rem; margin-bottom: 10px; height: 100px; resize: none; }
+        .btn-ai { background: var(--primary); color: white; border: none; width: 100%; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+        .res-box { margin-top: 20px; background: #eff6ff; border-radius: 15px; padding: 20px; border-left: 4px solid var(--primary); }
+        nav { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #e2e8f0; display: flex; padding: 10px 0; }
+        .nav-item { flex: 1; text-align: center; color: #94a3b8; cursor: pointer; font-size: 0.8rem; border: none; background: none; }
+        .nav-item.active { color: var(--primary); font-weight: 700; }
+        .nav-item i { display: block; font-size: 1.2rem; margin-bottom: 2px; }
+        .hidden { display: none; }
+        .loading { text-align: center; padding: 20px; color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>J-MASTER PRO</h1>
+    <div id="score" style="font-weight:700">SCORE: 0</div>
+</header>
+
+<div class="container">
+    <!-- 학습 탭 -->
+    <div id="study" class="page">
+        <div class="tab-menu">
+            <button class="tab-btn active" onclick="switchKana('h', this)">히라가나</button>
+            <button class="tab-btn" onclick="switchKana('k', this)">카타카나</button>
+        </div>
+        <div id="grid" class="kana-grid"></div>
+    </div>
+
+    <!-- 게임 탭 -->
+    <div id="game" class="page hidden">
+        <div id="game-start" class="game-menu card">
+            <h3 style="text-align:center">퀴즈 챌린지</h3>
+            <button class="btn-game" onclick="play('h')">히라가나 마스터</button>
+            <button class="btn-game" onclick="play('k')">카타카나 마스터</button>
+            <button class="btn-game" onclick="play('ai')">AI 무작위 단어 (N5~N4)</button>
+        </div>
+        <div id="game-play" class="card hidden">
+            <div id="loader" class="loading hidden"><i class="fas fa-spinner fa-spin"></i> AI 단어 생성 중...</div>
+            <div id="quiz-ui">
+                <div id="q-text" class="quiz-q">?</div>
+                <div id="q-opts" class="options"></div>
+                <div style="text-align:center; margin-top:20px;">
+                    <button onclick="exitGame()" style="background:none; border:none; color:#94a3b8; text-decoration:underline; cursor:pointer">그만하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI 번역기 -->
+    <div id="ai" class="page hidden">
+        <div class="card">
+            <h3>AI 튜터 번역기</h3>
+            <textarea id="ai-in" class="ai-input" placeholder="궁금한 문장을 입력하세요 (예: 화장실이 어디에요?)"></textarea>
+            <button class="btn-ai" onclick="translateAI()">번역하기</button>
+        </div>
+        <div id="ai-res" class="res-box hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+                <strong id="res-ja" style="font-size:1.5rem; color:var(--primary)"></strong>
+                <button onclick="speakText(document.getElementById('res-ja').innerText)" style="border:none; background:var(--primary); color:white; width:35px; height:35px; border-radius:50%"><i class="fas fa-volume-up"></i></button>
+            </div>
+            <div id="res-ko" style="margin-top:5px; color:#64748b"></div>
+            <div id="res-desc" style="margin-top:10px; font-size:0.9rem; border-top:1px solid #dbeafe; padding-top:10px"></div>
+        </div>
+    </div>
+</div>
+
+<nav>
+    <button class="nav-item active" onclick="showPage('study', this)"><i class="fas fa-book"></i>학습</button>
+    <button class="nav-item" onclick="showPage('game', this)"><i class="fas fa-gamepad"></i>게임</button>
+    <button class="nav-item" onclick="showPage('ai', this)"><i class="fas fa-robot"></i>AI번역</button>
+</nav>
+
+<script>
+    const data = {
+        h: [{j:'あ',k:'아'},{j:'い',k:'이'},{j:'う',k:'우'},{j:'え',k:'에'},{j:'お',k:'오'},{j:'か',k:'카'},{j:'き',k:'키'},{j:'く',k:'쿠'},{j:'け',k:'케'},{j:'こ',k:'코'},{j:'さ',k:'사'},{j:'し',k:'시'},{j:'す',k:'스'},{j:'せ',k:'세'},{j:'そ',k:'소'},{j:'た',k:'타'},{j:'ち',k:'치'},{j:'つ',k:'츠'},{j:'て',k:'테'},{j:'토',k:'토'},{j:'な',k:'나'},{j:'に',k:'니'},{j:'ぬ',k:'누'},{j:'ね',k:'네'},{j:'の',k:'노'},{j:'は',k:'하'},{j:'ひ',k:'히'},{j:'ふ',k:'후'},{j:'へ',k:'헤'},{j:'ほ',k:'호'},{j:'ま',k:'마'},{j:'み',k:'미'},{j:'む',k:'무'},{j:'め',k:'메'},{j:'も',k:'모'},{j:'や',k:'야'},{j:'ゆ',k:'유'},{j:'よ',k:'요'},{j:'ら',k:'라'},{j:'り',k:'리'},{j:'る',k:'루'},{j:'れ',k:'레'},{j:'ろ',k:'로'},{j:'わ',k:'와'},{j:'を',k:'오'},{j:'ん',k:'응'}],
+        k: [{j:'ア',k:'아'},{j:'イ',k:'이'},{j:'ウ',k:'우'},{j:'エ',k:'에'},{j:'オ',k:'오'},{j:'カ',k:'카'},{j:'キ',k:'키'},{j:'ク',k:'쿠'},{j:'ケ',k:'케'},{j:'コ',k:'코'},{j:'サ',k:'사'},{j:'シ',k:'시'},{j:'ス',k:'스'},{j:'セ',k:'세'},{j:'ソ',k:'소'},{j:'タ',k:'타'},{j:'チ',k:'치'},{j:'ツ',k:'츠'},{j:'テ',k:'테'},{j:'ト',k:'토'},{j:'ナ',k:'나'},{j:'ニ',k:'니'},{j:'ヌ',k:'누'},{j:'ネ',k:'네'},{j:'ノ',k:'노'},{j:'ハ',k:'하'},{j:'ヒ',k:'히'},{j:'フ',k:'후'},{j:'ヘ',k:'헤'},{j:'ホ',k:'호'},{j:'マ',k:'마'},{j:'ミ',k:'미'},{j:'ム',k:'무'},{j:'メ',k:'메'},{j:'モ',k:'모'},{j:'ヤ',k:'야'},{j:'ユ',k:'유'},{j:'ヨ',k:'요'},{j:'ラ',k:'라'},{j:'리',k:'리'},{j:'ル',k:'루'},{j:'レ',k:'레'},{j:'ロ',k:'로'},{j:'ワ',k:'와'},{j:'ヲ',k:'오'},{j:'ン',k:'응'}]
+    };
+
+    let score = 0;
+    let mode = 'h';
+    let currentQuiz = null;
+
+    function showPage(p, el) {
+        document.querySelectorAll('.page').forEach(x => x.classList.add('hidden'));
+        document.getElementById(p).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+        el.classList.add('active');
+        exitGame();
+    }
+
+    function switchKana(t, el) {
+        document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+        el.classList.add('active');
+        renderStudy(t);
+    }
+
+    function renderStudy(t) {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        data[t].forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'kana-item';
+            div.innerHTML = `<span class="ja">${item.j}</span><span class="ko">${item.k}</span>`;
+            div.onclick = () => speakText(item.j);
+            grid.appendChild(div);
+        });
+    }
+
+    function speakText(t) {
+        const msg = new SpeechSynthesisUtterance(t);
+        msg.lang = 'ja-JP';
+        window.speechSynthesis.speak(msg);
+    }
+
+    function play(m) {
+        mode = m;
+        document.getElementById('game-start').classList.add('hidden');
+        document.getElementById('game-play').classList.remove('hidden');
+        nextQuiz();
+    }
+
+    function exitGame() {
+        document.getElementById('game-start').classList.remove('hidden');
+        document.getElementById('game-play').classList.add('hidden');
+    }
+
+    async function nextQuiz() {
+        const qText = document.getElementById('q-text');
+        const qOpts = document.getElementById('q-opts');
+        const loader = document.getElementById('loader');
+        const ui = document.getElementById('quiz-ui');
+
+        qOpts.innerHTML = '';
+        
+        if(mode === 'ai') {
+            ui.classList.add('hidden');
+            loader.classList.remove('hidden');
+            try {
+                const res = await fetch('/.netlify/functions/openai', { method: 'POST', body: JSON.stringify({ mode: 'word_game' }) });
+                const d = await res.json();
+                const parts = d.text.split('|');
+                currentQuiz = { j: parts[0], k: parts[1] };
+            } catch(e) {
+                alert("AI 연결 오류! 히라가나 모드로 전환합니다.");
+                play('h'); return;
+            }
+            loader.classList.add('hidden');
+            ui.classList.remove('hidden');
+        } else {
+            const list = data[mode];
+            currentQuiz = list[Math.floor(Math.random()*list.length)];
+        }
+
+        qText.innerText = currentQuiz.j;
+        
+        let answers = [currentQuiz.k];
+        const allK = [...data.h, ...data.k].map(x => x.k);
+        while(answers.length < 4) {
+            let r = allK[Math.floor(Math.random()*allK.length)];
+            if(!answers.includes(r)) answers.push(r);
+        }
+        answers.sort(() => Math.random() - 0.5);
+
+        answers.forEach(a => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.innerText = a;
+            btn.onclick = () => check(a, btn);
+            qOpts.appendChild(btn);
+        });
+    }
+
+    function check(a, btn) {
+        if(a === currentQuiz.k) {
+            btn.classList.add('correct');
+            score += 10;
+            document.getElementById('score').innerText = `SCORE: ${score}`;
+            speakText(currentQuiz.j);
+            setTimeout(nextQuiz, 600);
+        } else {
+            btn.classList.add('wrong');
+        }
+    }
+
+    async function translateAI() {
+        const input = document.getElementById('ai-in').value;
+        if(!input) return;
+        const resBox = document.getElementById('ai-res');
+        resBox.classList.add('hidden');
+        
+        const res = await fetch('/.netlify/functions/openai', { method: 'POST', body: JSON.stringify({ mode: 'translate', input }) });
+        const d = await res.json();
+        const parts = d.text.split('|');
+        
+        document.getElementById('res-ja').innerText = parts[0];
+        document.getElementById('res-ko').innerText = parts[1];
+        document.getElementById('res-desc').innerText = parts[2] || '';
+        resBox.classList.remove('hidden');
+    }
+
+    renderStudy('h');
+</script>
+</body>
+</html>
+
