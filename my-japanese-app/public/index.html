@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>J-MASTER PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #2563eb; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', 'Noto Sans KR', sans-serif; margin: 0; background: var(--bg); color: var(--text); padding-bottom: 90px; }
+        header { background: var(--card); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        header h1 { font-size: 1.1rem; margin: 0; color: var(--primary); font-weight: 800; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 20px; padding: 25px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .tab-menu { display: flex; background: var(--border); padding: 4px; border-radius: 12px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; border: none; padding: 10px; border-radius: 8px; cursor: pointer; background: none; font-weight: 600; color: #64748b; }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .kana-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .kana-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 15px 5px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .kana-card span { display: block; }
+        .kana-card .ja { font-size: 1.6rem; font-weight: 700; }
+        .kana-card .ko { font-size: 0.85rem; color: #64748b; }
+        .game-selector { display: flex; flex-direction: column; gap: 12px; }
+        .btn-game { background: white; border: 2px solid var(--primary); color: var(--primary); padding: 18px; border-radius: 15px; font-weight: 700; cursor: pointer; font-size: 1rem; }
+        .btn-game:hover { background: var(--primary); color: white; }
+        .quiz-q { font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 30px 0; text-align: center; word-break: break-all; }
+        .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .choice-btn { background: white; border: 2px solid var(--border); padding: 15px; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .choice-btn.correct { border-color: #22c55e; background: #f0fdf4; color: #22c55e; }
+        .choice-btn.wrong { border-color: #ef4444; background: #fef2f2; color: #ef4444; }
+        textarea { width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 15px; font-size: 1rem; resize: none; min-height: 100px; font-family: inherit; margin-bottom: 10px; }
+        .btn-ai { background: var(--primary); color: white; border: none; width: 100%; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+        .res-box { margin-top: 20px; background: #f8fafc; border-radius: 15px; padding: 20px; position: relative; border-left: 5px solid var(--primary); }
+        .btn-speak { position: absolute; top: 20px; right: 20px; background: var(--primary); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; }
+        .nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid var(--border); padding: 10px 0; }
+        .nav-item { flex: 1; border: none; background: none; text-align: center; color: #94a3b8; cursor: pointer; font-size: 0.75rem; }
+        .nav-item.active { color: var(--primary); font-weight: 700; }
+        .nav-item i { font-size: 1.3rem; display: block; margin-bottom: 3px; }
+        .hidden { display: none; }
+        .loading { text-align: center; padding: 40px 0; color: var(--primary); font-weight: 600; }
+        .animate-pop { animation: pop 0.3s ease-out; }
+        @keyframes pop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>J-MASTER PRO</h1>
+    <div id="score-display" style="font-weight:700; color:var(--primary)">SCORE: 0</div>
+</header>
+
+<div class="container">
+    <!-- 학습 페이지 -->
+    <div id="page-study" class="page-content">
+        <div class="tab-menu">
+            <button class="tab-btn active" onclick="switchStudy('h', this)">히라가나</button>
+            <button class="tab-btn" onclick="switchStudy('k', this)">카타카나</button>
+        </div>
+        <div id="kana-grid" class="kana-grid animate-pop"></div>
+    </div>
+
+    <!-- 게임 페이지 -->
+    <div id="page-game" class="page-content hidden">
+        <div id="game-menu" class="card animate-pop">
+            <h2 style="text-align:center; margin-top:0;">챌린지 모드</h2>
+            <div class="game-selector">
+                <button class="btn-game" onclick="startGame('h')">히라가나 맞히기</button>
+                <button class="btn-game" onclick="startGame('k')">카타카나 맞히기</button>
+                <button class="btn-game" onclick="startGame('ai')">AI 무작위 단어 퀴즈</button>
+            </div>
+        </div>
+        <div id="game-play" class="card hidden animate-pop">
+            <div id="quiz-loading" class="loading hidden"><i class="fas fa-spinner fa-spin"></i> AI가 단어를 가져오는 중...</div>
+            <div id="quiz-content">
+                <div id="quiz-q" class="quiz-q">?</div>
+                <div id="quiz-options" class="choice-grid"></div>
+                <p onclick="exitGame()" style="text-align:center; color:#64748b; text-decoration:underline; cursor:pointer; margin-top:30px;">그만하기</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI 번역 페이지 -->
+    <div id="page-ai" class="page-content hidden">
+        <div class="card animate-pop">
+            <h3 style="margin-top:0;">AI 실생활 번역기</h3>
+            <textarea id="ai-input" placeholder="번역할 한글 문장을 입력하세요."></textarea>
+            <button class="btn-ai" onclick="askAI()">번역 및 발음 분석</button>
+        </div>
+        <div id="ai-loading" class="loading hidden"><i class="fas fa-spinner fa-spin"></i> 번역 중...</div>
+        <div id="ai-result" class="res-box hidden animate-pop">
+            <button class="btn-speak" onclick="speakResult()"><i class="fas fa-volume-up"></i></button>
+            <span id="res-ja" style="font-size:1.8rem; font-weight:800; color:var(--primary); display:block;"></span>
+            <span id="res-pron" style="color:#64748b; display:block; margin:5px 0 10px;"></span>
+            <span id="res-mean" style="border-top:1px solid #e2e8f0; padding-top:10px; font-size:0.95rem; display:block;"></span>
+        </div>
+    </div>
+</div>
+
+<nav class="nav">
+    <button class="nav-item active" onclick="nav('study', this)"><i class="fas fa-book-open"></i>학습</button>
+    <button class="nav-item" onclick="nav('game', this)"><i class="fas fa-bolt"></i>게임</button>
+    <button class="nav-item" onclick="nav('ai', this)"><i class="fas fa-magic"></i>AI번역</button>
+</nav>
+
+<script>
+    const kana = {
+        h: [{k:'あ',p:'아'},{k:'い',p:'이'},{k:'う',p:'우'},{k:'え',p:'에'},{k:'お',p:'오'},{k:'か',p:'카'},{k:'き',p:'키'},{k:'く',p:'쿠'},{k:'け',p:'케'},{k:'こ',p:'코'},{k:'さ',p:'사'},{k:'し',p:'시'},{k:'す',p:'스'},{k:'せ',p:'세'},{k:'そ',p:'소'},{k:'た',p:'타'},{k:'ち',p:'치'},{k:'つ',p:'츠'},{k:'て',p:'테'},{k:'と',p:'토'},{k:'な',p:'나'},{k:'에',p:'니'},{k:'ぬ',p:'누'},{k:'ね',p:'네'},{k:'の',p:'노'},{k:'は',p:'하'},{k:'ひ',p:'히'},{k:'ふ',p:'후'},{k:'へ',p:'헤'},{k:'ほ',p:'호'},{k:'ま',p:'마'},{k:'み',p:'미'},{k:'む',p:'무'},{k:'め',p:'메'},{k:'も',p:'모'},{k:'や',p:'야'},{k:'ゆ',p:'유'},{k:'よ',p:'요'},{k:'ら',p:'라'},{k:'り',p:'리'},{k:'る',p:'루'},{k:'れ',p:'레'},{k:'ろ',p:'로'},{k:'わ',p:'와'},{k:'を',p:'오'},{k:'ん',p:'응'}],
+        k: [{k:'ア',p:'아'},{k:'이',p:'이'},{k:'우',p:'우'},{k:'エ',p:'에'},{k:'オ',p:'오'},{k:'카',p:'카'},{k:'키',p:'키'},{k:'쿠',p:'쿠'},{k:'케',p:'케'},{k:'코',p:'코'},{k:'사',p:'사'},{k:'시',p:'시'},{k:'스',p:'스'},{k:'세',p:'세'},{k:'소',p:'소'},{k:'타',p:'타'},{k:'치',p:'치'},{k:'츠',p:'츠'},{k:'테',p:'테'},{k:'토',p:'토'},{k:'나',p:'나'},{k:'니',p:'니'},{k:'누',p:'누'},{k:'네',p:'네'},{k:'노',p:'노'},{k:'하',p:'하'},{k:'히',p:'히'},{k:'후',p:'후'},{k:'헤',p:'헤'},{k:'호',p:'호'},{k:'마',p:'마'},{k:'미',p:'미'},{k:'무',p:'무'},{k:'메',p:'메'},{k:'모',p:'모'},{k:'야',p:'야'},{k:'유',p:'유'},{k:'요',p:'요'},{k:'라',p:'라'},{k:'리',p:'리'},{k:'루',p:'루'},{k:'레',p:'레'},{k:'로',p:'로'},{k:'와',p:'와'},{k:'오',p:'오'},{k:'응',p:'응'}]
+    };
+
+    let score = 0;
+    let currentGame = 'h';
+    let currentQuiz = null;
+
+    function nav(p, el) {
+        document.querySelectorAll('.page-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById('page-'+p).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        if(p !== 'game') exitGame();
+    }
+
+    function switchStudy(t, b) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        b.classList.add('active');
+        renderStudy(t);
+    }
+
+    function renderStudy(t) {
+        const grid = document.getElementById('kana-grid');
+        grid.innerHTML = '';
+        kana[t].forEach(item => {
+            const d = document.createElement('div');
+            d.className = 'kana-card';
+            d.innerHTML = `<span class="ja">${item.k}</span><span class="ko">${item.p}</span>`;
+            d.onclick = () => speak(item.k);
+            grid.appendChild(d);
+        });
+    }
+
+    function speak(text) {
+        const m = new SpeechSynthesisUtterance(text);
+        m.lang = 'ja-JP';
+        window.speechSynthesis.speak(m);
+    }
+
+    function startGame(mode) {
+        currentGame = mode;
+        document.getElementById('game-menu').classList.add('hidden');
+        document.getElementById('game-play').classList.remove('hidden');
+        loadQuiz();
+    }
+
+    function exitGame() {
+        document.getElementById('game-menu').classList.remove('hidden');
+        document.getElementById('game-play').classList.add('hidden');
+    }
+
+    async function loadQuiz() {
+        const content = document.getElementById('quiz-content');
+        const loader = document.getElementById('quiz-loading');
+        const qText = document.getElementById('quiz-q');
+        const optsArea = document.getElementById('quiz-options');
+        
+        optsArea.innerHTML = '';
+        
+        if (currentGame === 'ai') {
+            content.classList.add('hidden');
+            loader.classList.remove('hidden');
+            try {
+                const res = await fetch('/.netlify/functions/openai', { 
+                    method: 'POST', 
+                    body: JSON.stringify({ mode: 'word_game' }) 
+                });
+                const data = await res.json();
+                const parts = data.text.split('|');
+                
+                if(parts.length < 2) throw new Error("형식 오류");
+                currentQuiz = { k: parts[0], p: parts[1] };
+                
+            } catch(e) {
+                alert("AI가 피곤한가봐요! 히라가나 퀴즈로 대신할게요.");
+                startGame('h');
+                return;
+            }
+        } else {
+            const source = kana[currentGame];
+            currentQuiz = source[Math.floor(Math.random() * source.length)];
+        }
+
+        qText.innerText = currentQuiz.k;
+        loader.classList.add('hidden');
+        content.classList.remove('hidden');
+
+        // 선택지 만들기
+        let choices = [currentQuiz.p];
+        const allPron = [...kana.h, ...kana.k].map(i => i.p);
+        while(choices.length < 4) {
+            let r = allPron[Math.floor(Math.random() * allPron.length)];
+            if(!choices.includes(r)) choices.push(r);
+        }
+        choices.sort(() => Math.random() - 0.5);
+
+        choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = 'choice-btn';
+            b.innerText = c;
+            b.onclick = () => {
+                if(c === currentQuiz.p) {
+                    b.classList.add('correct');
+                    score += 10;
+                    document.getElementById('score-display').innerText = `SCORE: ${score}`;
+                    speak(currentQuiz.k);
+                    setTimeout(loadQuiz, 800);
+                } else {
+                    b.classList.add('wrong');
+                }
+            };
+            optsArea.appendChild(b);
+        });
+    }
+
+    async function askAI() {
+        const input = document.getElementById('ai-input').value;
+        if(!input) return;
+        const loader = document.getElementById('ai-loading');
+        const resBox = document.getElementById('ai-result');
+        resBox.classList.add('hidden');
+        loader.classList.remove('hidden');
+
+        try {
+            const res = await fetch('/.netlify/functions/openai', { 
+                method: 'POST', 
+                body: JSON.stringify({ mode: 'translate', input }) 
+            });
+            const data = await res.json();
+            const parts = data.text.split('|');
+            document.getElementById('res-ja').innerText = parts[0];
+            document.getElementById('res-pron').innerText = parts[1];
+            document.getElementById('res-mean').innerText = parts[2] || '번역 완료';
+            loader.classList.add('hidden');
+            resBox.classList.remove('hidden');
+            speak(parts[0]);
+        } catch(e) {
+            loader.classList.add('hidden');
+            alert("AI 호출에 실패했습니다.");
+        }
+    }
+
+    function speakResult() {
+        speak(document.getElementById('res-ja').innerText);
+    }
+
+    renderStudy('h');
+</script>
+</body>
+</html>
+
