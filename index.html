@@ -6,225 +6,245 @@
     <title>J-MASTER PRO</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #4f46e5; --secondary: #6366f1; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
-        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; margin: 0; background: var(--bg); color: var(--text); padding-bottom: 80px; }
-        header { background: var(--card); padding: 15px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        header h1 { font-size: 1.2rem; margin: 0; color: var(--primary); font-weight: 800; }
+        :root { --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; margin: 0; background: var(--bg); color: var(--text); padding-bottom: 90px; }
+        header { background: var(--card); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        header h1 { font-size: 1.1rem; margin: 0; color: var(--primary); font-weight: 800; }
         .container { max-width: 500px; margin: 0 auto; padding: 20px; }
-        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #f1f5f9; }
+        .card { background: white; border-radius: 20px; padding: 25px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .tab-menu { display: flex; background: #f1f5f9; padding: 5px; border-radius: 12px; margin-bottom: 20px; }
         .tab-btn { flex: 1; border: none; padding: 10px; border-radius: 8px; cursor: pointer; background: none; font-weight: 600; color: #64748b; }
         .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .kana-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .kana-item { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px 5px; text-align: center; cursor: pointer; }
-        .kana-item .ja { font-size: 1.5rem; font-weight: 700; display: block; }
-        .kana-item .ko { font-size: 0.8rem; color: #94a3b8; display: block; }
-        .game-menu { display: flex; flex-direction: column; gap: 10px; }
-        .btn-game { background: white; border: 2px solid var(--primary); color: var(--primary); padding: 15px; border-radius: 15px; font-weight: 700; cursor: pointer; }
+        .kana-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .kana-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 15px 5px; text-align: center; cursor: pointer; }
+        .kana-card .ja { font-size: 1.6rem; font-weight: 700; display: block; }
+        .kana-card .ko { font-size: 0.85rem; color: #94a3b8; display: block; }
+        .game-selector { display: flex; flex-direction: column; gap: 12px; }
+        .btn-game { background: white; border: 2px solid var(--primary); color: var(--primary); padding: 18px; border-radius: 15px; font-weight: 700; cursor: pointer; font-size: 1rem; }
         .btn-game:hover { background: var(--primary); color: white; }
-        .quiz-q { font-size: 4rem; text-align: center; margin: 40px 0; color: var(--primary); font-weight: 800; }
-        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .opt-btn { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; font-weight: 600; cursor: pointer; }
-        .opt-btn.correct { background: #22c55e; color: white; border-color: #22c55e; }
-        .opt-btn.wrong { background: #ef4444; color: white; border-color: #ef4444; }
-        .ai-input { width: 100%; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; font-size: 1rem; margin-bottom: 10px; height: 100px; resize: none; }
+        .quiz-q { font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 30px 0; text-align: center; }
+        .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .choice-btn { background: white; border: 2px solid var(--border); padding: 15px; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .choice-btn.correct { border-color: #22c55e; background: #f0fdf4; color: #22c55e; }
+        .choice-btn.wrong { border-color: #ef4444; background: #fef2f2; color: #ef4444; }
+        textarea { width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 15px; font-size: 1rem; resize: none; min-height: 100px; margin-bottom: 10px; font-family: inherit; }
         .btn-ai { background: var(--primary); color: white; border: none; width: 100%; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; }
-        .res-box { margin-top: 20px; background: #eff6ff; border-radius: 15px; padding: 20px; border-left: 4px solid var(--primary); }
-        nav { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #e2e8f0; display: flex; padding: 10px 0; }
-        .nav-item { flex: 1; text-align: center; color: #94a3b8; cursor: pointer; font-size: 0.8rem; border: none; background: none; }
+        .res-box { margin-top: 20px; background: #eff6ff; border-radius: 15px; padding: 20px; border-left: 5px solid var(--primary); }
+        .nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid var(--border); padding: 10px 0; }
+        .nav-item { flex: 1; border: none; background: none; text-align: center; color: #94a3b8; cursor: pointer; font-size: 0.75rem; }
         .nav-item.active { color: var(--primary); font-weight: 700; }
-        .nav-item i { display: block; font-size: 1.2rem; margin-bottom: 2px; }
+        .nav-item i { font-size: 1.3rem; display: block; margin-bottom: 3px; }
         .hidden { display: none; }
-        .loading { text-align: center; padding: 20px; color: var(--primary); }
+        .loading { text-align: center; padding: 40px 0; color: var(--primary); font-weight: 600; }
     </style>
 </head>
 <body>
 
 <header>
     <h1>J-MASTER PRO</h1>
-    <div id="score" style="font-weight:700">SCORE: 0</div>
+    <div id="score-display" style="font-weight:700; color:var(--primary)">SCORE: 0</div>
 </header>
 
 <div class="container">
-    <!-- 학습 탭 -->
-    <div id="study" class="page">
+    <!-- 학습 페이지 -->
+    <div id="page-study" class="page-content">
         <div class="tab-menu">
-            <button class="tab-btn active" onclick="switchKana('h', this)">히라가나</button>
-            <button class="tab-btn" onclick="switchKana('k', this)">카타카나</button>
+            <button class="tab-btn active" onclick="switchStudy('h', this)">히라가나</button>
+            <button class="tab-btn" onclick="switchStudy('k', this)">카타카나</button>
         </div>
-        <div id="grid" class="kana-grid"></div>
+        <div id="kana-grid" class="kana-grid"></div>
     </div>
 
-    <!-- 게임 탭 -->
-    <div id="game" class="page hidden">
-        <div id="game-start" class="game-menu card">
-            <h3 style="text-align:center">퀴즈 챌린지</h3>
-            <button class="btn-game" onclick="play('h')">히라가나 마스터</button>
-            <button class="btn-game" onclick="play('k')">카타카나 마스터</button>
-            <button class="btn-game" onclick="play('ai')">AI 무작위 단어 (N5~N4)</button>
+    <!-- 게임 페이지 -->
+    <div id="page-game" class="page-content hidden">
+        <div id="game-menu" class="card">
+            <h2 style="text-align:center; margin-top:0;">실전 챌린지</h2>
+            <div class="game-selector">
+                <button class="btn-game" onclick="startGame('h')">히라가나 퀴즈</button>
+                <button class="btn-game" onclick="startGame('k')">카타카나 퀴즈</button>
+                <button class="btn-game" onclick="startGame('ai')">AI 실생활 생존 일본어</button>
+            </div>
         </div>
         <div id="game-play" class="card hidden">
-            <div id="loader" class="loading hidden"><i class="fas fa-spinner fa-spin"></i> AI 단어 생성 중...</div>
-            <div id="quiz-ui">
-                <div id="q-text" class="quiz-q">?</div>
-                <div id="q-opts" class="options"></div>
-                <div style="text-align:center; margin-top:20px;">
-                    <button onclick="exitGame()" style="background:none; border:none; color:#94a3b8; text-decoration:underline; cursor:pointer">그만하기</button>
-                </div>
+            <div id="quiz-loading" class="loading hidden"><i class="fas fa-spinner fa-spin"></i> 현지 단어를 가져오는 중...</div>
+            <div id="quiz-content">
+                <div id="quiz-q" class="quiz-q">?</div>
+                <div id="quiz-options" class="choice-grid"></div>
+                <p onclick="exitGame()" style="text-align:center; color:#64748b; text-decoration:underline; cursor:pointer; margin-top:30px;">그만하기</p>
             </div>
         </div>
     </div>
 
-    <!-- AI 번역기 -->
-    <div id="ai" class="page hidden">
+    <!-- AI 번역 페이지 -->
+    <div id="page-ai" class="page-content hidden">
         <div class="card">
-            <h3>AI 튜터 번역기</h3>
-            <textarea id="ai-in" class="ai-input" placeholder="궁금한 문장을 입력하세요 (예: 화장실이 어디에요?)"></textarea>
-            <button class="btn-ai" onclick="translateAI()">번역하기</button>
+            <h3 style="margin-top:0;">AI 실생활 튜터</h3>
+            <textarea id="ai-input" placeholder="번역이나 궁금한 표현을 입력하세요."></textarea>
+            <button class="btn-ai" onclick="askAI()">번역 및 분석</button>
         </div>
-        <div id="ai-res" class="res-box hidden">
-            <div style="display:flex; justify-content:space-between; align-items:center">
-                <strong id="res-ja" style="font-size:1.5rem; color:var(--primary)"></strong>
-                <button onclick="speakText(document.getElementById('res-ja').innerText)" style="border:none; background:var(--primary); color:white; width:35px; height:35px; border-radius:50%"><i class="fas fa-volume-up"></i></button>
+        <div id="ai-loading" class="loading hidden"><i class="fas fa-spinner fa-spin"></i> 분석 중...</div>
+        <div id="ai-result" class="res-box hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span id="res-ja" style="font-size:1.8rem; font-weight:800; color:var(--primary);"></span>
+                <button onclick="speakResult()" style="background:var(--primary); color:white; border:none; width:35px; height:35px; border-radius:50%; cursor:pointer;"><i class="fas fa-volume-up"></i></button>
             </div>
-            <div id="res-ko" style="margin-top:5px; color:#64748b"></div>
-            <div id="res-desc" style="margin-top:10px; font-size:0.9rem; border-top:1px solid #dbeafe; padding-top:10px"></div>
+            <span id="res-pron" style="color:#64748b; display:block; margin:5px 0 10px;"></span>
+            <div id="res-mean" style="border-top:1px solid #e2e8f0; padding-top:10px; font-size:0.95rem;"></div>
         </div>
     </div>
 </div>
 
-<nav>
-    <button class="nav-item active" onclick="showPage('study', this)"><i class="fas fa-book"></i>학습</button>
-    <button class="nav-item" onclick="showPage('game', this)"><i class="fas fa-gamepad"></i>게임</button>
-    <button class="nav-item" onclick="showPage('ai', this)"><i class="fas fa-robot"></i>AI번역</button>
+<nav class="nav">
+    <button class="nav-item active" onclick="nav('study', this)"><i class="fas fa-book-open"></i>학습</button>
+    <button class="nav-item" onclick="nav('game', this)"><i class="fas fa-bolt"></i>게임</button>
+    <button class="nav-item" onclick="nav('ai', this)"><i class="fas fa-magic"></i>AI번역</button>
 </nav>
 
 <script>
-    const data = {
-        h: [{j:'あ',k:'아'},{j:'い',k:'이'},{j:'う',k:'우'},{j:'え',k:'에'},{j:'お',k:'오'},{j:'か',k:'카'},{j:'き',k:'키'},{j:'く',k:'쿠'},{j:'け',k:'케'},{j:'こ',k:'코'},{j:'さ',k:'사'},{j:'し',k:'시'},{j:'す',k:'스'},{j:'せ',k:'세'},{j:'そ',k:'소'},{j:'た',k:'타'},{j:'ち',k:'치'},{j:'つ',k:'츠'},{j:'て',k:'테'},{j:'토',k:'토'},{j:'な',k:'나'},{j:'に',k:'니'},{j:'ぬ',k:'누'},{j:'ね',k:'네'},{j:'の',k:'노'},{j:'は',k:'하'},{j:'ひ',k:'히'},{j:'ふ',k:'후'},{j:'へ',k:'헤'},{j:'ほ',k:'호'},{j:'ま',k:'마'},{j:'み',k:'미'},{j:'む',k:'무'},{j:'め',k:'메'},{j:'も',k:'모'},{j:'や',k:'야'},{j:'ゆ',k:'유'},{j:'よ',k:'요'},{j:'ら',k:'라'},{j:'り',k:'리'},{j:'る',k:'루'},{j:'れ',k:'레'},{j:'ろ',k:'로'},{j:'わ',k:'와'},{j:'を',k:'오'},{j:'ん',k:'응'}],
-        k: [{j:'ア',k:'아'},{j:'イ',k:'이'},{j:'ウ',k:'우'},{j:'エ',k:'에'},{j:'オ',k:'오'},{j:'カ',k:'카'},{j:'キ',k:'키'},{j:'ク',k:'쿠'},{j:'ケ',k:'케'},{j:'コ',k:'코'},{j:'サ',k:'사'},{j:'シ',k:'시'},{j:'ス',k:'스'},{j:'セ',k:'세'},{j:'ソ',k:'소'},{j:'タ',k:'타'},{j:'チ',k:'치'},{j:'ツ',k:'츠'},{j:'テ',k:'테'},{j:'ト',k:'토'},{j:'ナ',k:'나'},{j:'ニ',k:'니'},{j:'ヌ',k:'누'},{j:'ネ',k:'네'},{j:'ノ',k:'노'},{j:'ハ',k:'하'},{j:'ヒ',k:'히'},{j:'フ',k:'후'},{j:'ヘ',k:'헤'},{j:'ホ',k:'호'},{j:'マ',k:'마'},{j:'ミ',k:'미'},{j:'ム',k:'무'},{j:'メ',k:'메'},{j:'モ',k:'모'},{j:'ヤ',k:'야'},{j:'ユ',k:'유'},{j:'ヨ',k:'요'},{j:'ラ',k:'라'},{j:'리',k:'리'},{j:'ル',k:'루'},{j:'レ',k:'레'},{j:'ロ',k:'로'},{j:'ワ',k:'와'},{j:'ヲ',k:'오'},{j:'ン',k:'응'}]
+    const kana = {
+        h: [{k:'あ',p:'아'},{k:'い',p:'이'},{k:'う',p:'우'},{k:'え',p:'에'},{k:'お',p:'오'},{k:'か',p:'카'},{k:'き',p:'키'},{k:'く',p:'쿠'},{k:'け',p:'케'},{k:'こ',p:'코'},{k:'さ',p:'사'},{k:'し',p:'시'},{k:'す',p:'스'},{k:'せ',p:'세'},{k:'そ',p:'소'},{k:'た',p:'타'},{k:'ち',p:'치'},{k:'つ',p:'츠'},{k:'て',p:'테'},{k:'と',p:'토'},{k:'な',p:'나'},{k:'に',p:'니'},{k:'ぬ',p:'누'},{k:'ね',p:'네'},{k:'の',p:'노'},{k:'は',p:'하'},{k:'ひ',p:'히'},{k:'ふ',p:'후'},{k:'へ',p:'헤'},{k:'ほ',p:'호'},{k:'ま',p:'마'},{k:'み',p:'미'},{k:'む',p:'무'},{k:'め',p:'메'},{k:'も',p:'모'},{k:'や',p:'야'},{k:'ゆ',p:'유'},{k:'よ',p:'요'},{k:'ら',p:'라'},{k:'り',p:'리'},{k:'る',p:'루'},{k:'れ',p:'레'},{k:'ろ',p:'로'},{k:'わ',p:'와'},{k:'을',p:'오'},{k:'ん',p:'응'}],
+        k: [{k:'ア',p:'아'},{k:'イ',p:'이'},{k:'ウ',p:'우'},{k:'エ',p:'에'},{k:'オ',p:'오'},{k:'カ',p:'카'},{k:'キ',p:'키'},{k:'ク',p:'쿠'},{k:'ケ',p:'케'},{k:'コ',p:'코'},{k:'サ',p:'사'},{k:'シ',p:'시'},{k:'ス',p:'스'},{k:'セ',p:'세'},{k:'ソ',p:'소'},{k:'タ',p:'타'},{k:'チ',p:'치'},{k:'ツ',p:'츠'},{k:'テ',p:'테'},{k:'ト',p:'토'},{k:'ナ',p:'나'},{k:'ニ',p:'니'},{k:'ヌ',p:'누'},{k:'ネ',p:'네'},{k:'노',p:'노'},{k:'ハ',p:'하'},{k:'ヒ',p:'히'},{k:'フ',p:'후'},{k:'ヘ',p:'헤'},{k:'ホ',p:'호'},{k:'マ',p:'마'},{k:'ミ',p:'미'},{k:'ム',p:'무'},{k:'メ',p:'메'},{k:'モ',p:'모'},{k:'ヤ',p:'야'},{k:'ユ',p:'유'},{k:'ヨ',p:'요'},{k:'ラ',p:'라'},{k:'리',p:'리'},{k:'ル',p:'루'},{k:'레',p:'레'},{k:'로',p:'로'},{k:'ワ',p:'와'},{k:'ヲ',p:'오'},{k:'ン',p:'응'}]
     };
 
     let score = 0;
-    let mode = 'h';
-    let currentQuiz = null;
+    let currentGameMode = 'h';
+    let currentQuizItem = null;
 
-    function showPage(p, el) {
-        document.querySelectorAll('.page').forEach(x => x.classList.add('hidden'));
-        document.getElementById(p).classList.remove('hidden');
-        document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+    function nav(p, el) {
+        document.querySelectorAll('.page-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById('page-'+p).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
         exitGame();
     }
 
-    function switchKana(t, el) {
-        document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
-        el.classList.add('active');
+    function switchStudy(t, b) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        b.classList.add('active');
         renderStudy(t);
     }
 
     function renderStudy(t) {
-        const grid = document.getElementById('grid');
+        const grid = document.getElementById('kana-grid');
         grid.innerHTML = '';
-        data[t].forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'kana-item';
-            div.innerHTML = `<span class="ja">${item.j}</span><span class="ko">${item.k}</span>`;
-            div.onclick = () => speakText(item.j);
-            grid.appendChild(div);
+        kana[t].forEach(item => {
+            const d = document.createElement('div');
+            d.className = 'kana-card';
+            d.innerHTML = `<span class="ja">${item.k}</span><span class="ko">${item.p}</span>`;
+            d.onclick = () => speak(item.k);
+            grid.appendChild(d);
         });
     }
 
-    function speakText(t) {
-        const msg = new SpeechSynthesisUtterance(t);
-        msg.lang = 'ja-JP';
-        window.speechSynthesis.speak(msg);
+    function speak(text) {
+        const m = new SpeechSynthesisUtterance(text);
+        m.lang = 'ja-JP';
+        window.speechSynthesis.speak(m);
     }
 
-    function play(m) {
-        mode = m;
-        document.getElementById('game-start').classList.add('hidden');
+    function startGame(mode) {
+        currentGameMode = mode;
+        document.getElementById('game-menu').classList.add('hidden');
         document.getElementById('game-play').classList.remove('hidden');
-        nextQuiz();
+        loadNextQuiz();
     }
 
     function exitGame() {
-        document.getElementById('game-start').classList.remove('hidden');
+        document.getElementById('game-menu').classList.remove('hidden');
         document.getElementById('game-play').classList.add('hidden');
     }
 
-    async function nextQuiz() {
-        const qText = document.getElementById('q-text');
-        const qOpts = document.getElementById('q-opts');
-        const loader = document.getElementById('loader');
-        const ui = document.getElementById('quiz-ui');
-
-        qOpts.innerHTML = '';
+    async function loadNextQuiz() {
+        const content = document.getElementById('quiz-content');
+        const loader = document.getElementById('quiz-loading');
+        const qText = document.getElementById('quiz-q');
+        const optsArea = document.getElementById('quiz-options');
         
-        if(mode === 'ai') {
-            ui.classList.add('hidden');
+        optsArea.innerHTML = '';
+        
+        if (currentGameMode === 'ai') {
+            content.classList.add('hidden');
             loader.classList.remove('hidden');
             try {
-                const res = await fetch('/.netlify/functions/openai', { method: 'POST', body: JSON.stringify({ mode: 'word_game' }) });
-                const d = await res.json();
-                const parts = d.text.split('|');
-                currentQuiz = { j: parts[0], k: parts[1] };
+                const res = await fetch('/.netlify/functions/openai', { 
+                    method: 'POST', 
+                    body: JSON.stringify({ mode: 'word_game' }) 
+                });
+                const dataRes = await res.json();
+                const parts = dataRes.text.split('|');
+                currentQuizItem = { k: parts[0], p: parts[1], m: parts[2] };
             } catch(e) {
-                alert("AI 연결 오류! 히라가나 모드로 전환합니다.");
-                play('h'); return;
+                alert("AI 로딩 실패. 히라가나 모드로 전환합니다.");
+                startGame('h'); return;
             }
             loader.classList.add('hidden');
-            ui.classList.remove('hidden');
+            content.classList.remove('hidden');
         } else {
-            const list = data[mode];
-            currentQuiz = list[Math.floor(Math.random()*list.length)];
+            const source = kana[currentGameMode];
+            const item = source[Math.floor(Math.random() * source.length)];
+            currentQuizItem = { k: item.k, p: item.p, m: item.p };
         }
 
-        qText.innerText = currentQuiz.j;
-        
-        let answers = [currentQuiz.k];
-        const allK = [...data.h, ...data.k].map(x => x.k);
-        while(answers.length < 4) {
-            let r = allK[Math.floor(Math.random()*allK.length)];
-            if(!answers.includes(r)) answers.push(r);
-        }
-        answers.sort(() => Math.random() - 0.5);
+        qText.innerText = currentQuizItem.k;
 
-        answers.forEach(a => {
-            const btn = document.createElement('button');
-            btn.className = 'opt-btn';
-            btn.innerText = a;
-            btn.onclick = () => check(a, btn);
-            qOpts.appendChild(btn);
+        // 선택지 생성
+        let choices = [currentQuizItem.p];
+        const allPron = [...kana.h, ...kana.k].map(i => i.p);
+        while(choices.length < 4) {
+            let r = allPron[Math.floor(Math.random() * allPron.length)];
+            if(!choices.includes(r)) choices.push(r);
+        }
+        choices.sort(() => Math.random() - 0.5);
+
+        choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = 'choice-btn';
+            b.innerText = c;
+            b.onclick = () => {
+                if(c === currentQuizItem.p) {
+                    b.classList.add('correct');
+                    score += 10;
+                    document.getElementById('score-display').innerText = `SCORE: ${score}`;
+                    speak(currentQuizItem.k);
+                    setTimeout(loadNextQuiz, 800);
+                } else {
+                    b.classList.add('wrong');
+                }
+            };
+            optsArea.appendChild(b);
         });
     }
 
-    function check(a, btn) {
-        if(a === currentQuiz.k) {
-            btn.classList.add('correct');
-            score += 10;
-            document.getElementById('score').innerText = `SCORE: ${score}`;
-            speakText(currentQuiz.j);
-            setTimeout(nextQuiz, 600);
-        } else {
-            btn.classList.add('wrong');
+    async function askAI() {
+        const input = document.getElementById('ai-input').value;
+        if(!input) return;
+        const loader = document.getElementById('ai-loading');
+        const resBox = document.getElementById('ai-result');
+        resBox.classList.add('hidden');
+        loader.classList.remove('hidden');
+
+        try {
+            const res = await fetch('/.netlify/functions/openai', { 
+                method: 'POST', 
+                body: JSON.stringify({ mode: 'translate', input }) 
+            });
+            const dataRes = await res.json();
+            const parts = dataRes.text.split('|');
+            document.getElementById('res-ja').innerText = parts[0];
+            document.getElementById('res-pron').innerText = parts[1];
+            document.getElementById('res-mean').innerText = parts[2] || '실생활 표현 번역 완료';
+            loader.classList.add('hidden');
+            resBox.classList.remove('hidden');
+            speak(parts[0]);
+        } catch(e) {
+            loader.classList.add('hidden');
+            alert("AI 분석 실패");
         }
     }
 
-    async function translateAI() {
-        const input = document.getElementById('ai-in').value;
-        if(!input) return;
-        const resBox = document.getElementById('ai-res');
-        resBox.classList.add('hidden');
-        
-        const res = await fetch('/.netlify/functions/openai', { method: 'POST', body: JSON.stringify({ mode: 'translate', input }) });
-        const d = await res.json();
-        const parts = d.text.split('|');
-        
-        document.getElementById('res-ja').innerText = parts[0];
-        document.getElementById('res-ko').innerText = parts[1];
-        document.getElementById('res-desc').innerText = parts[2] || '';
-        resBox.classList.remove('hidden');
+    function speakResult() {
+        speak(document.getElementById('res-ja').innerText);
     }
 
     renderStudy('h');
