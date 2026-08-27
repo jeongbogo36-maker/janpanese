@@ -20,12 +20,11 @@
         .kana-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 15px 5px; text-align: center; cursor: pointer; }
         .kana-card .ja { font-size: 1.6rem; font-weight: 700; display: block; }
         .kana-card .ko { font-size: 0.85rem; color: #94a3b8; display: block; }
-        .game-selector { display: flex; flex-direction: column; gap: 12px; }
-        .btn-game { background: white; border: 2px solid var(--primary); color: var(--primary); padding: 18px; border-radius: 15px; font-weight: 700; cursor: pointer; font-size: 1rem; }
+        .btn-game { background: white; border: 2px solid var(--primary); color: var(--primary); padding: 18px; border-radius: 15px; font-weight: 700; cursor: pointer; font-size: 1rem; margin-bottom: 12px; width: 100%; }
         .btn-game:hover { background: var(--primary); color: white; }
-        .quiz-q { font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 30px 0; text-align: center; }
+        .quiz-q { font-size: 3rem; font-weight: 800; color: var(--primary); margin: 30px 0; text-align: center; word-break: break-all; }
         .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .choice-btn { background: white; border: 2px solid var(--border); padding: 15px; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .choice-btn { background: white; border: 2px solid var(--border); padding: 15px; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .choice-btn.correct { border-color: #22c55e; background: #f0fdf4; color: #22c55e; }
         .choice-btn.wrong { border-color: #ef4444; background: #fef2f2; color: #ef4444; }
         textarea { width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 15px; font-size: 1rem; resize: none; min-height: 100px; margin-bottom: 10px; font-family: inherit; }
@@ -47,7 +46,6 @@
 </header>
 
 <div class="container">
-    <!-- 학습 페이지 -->
     <div id="page-study" class="page-content">
         <div class="tab-menu">
             <button class="tab-btn active" onclick="switchStudy('h', this)">히라가나</button>
@@ -56,18 +54,15 @@
         <div id="kana-grid" class="kana-grid"></div>
     </div>
 
-    <!-- 게임 페이지 -->
     <div id="page-game" class="page-content hidden">
         <div id="game-menu" class="card">
-            <h2 style="text-align:center; margin-top:0;">실전 챌린지</h2>
-            <div class="game-selector">
-                <button class="btn-game" onclick="startGame('h')">히라가나 퀴즈</button>
-                <button class="btn-game" onclick="startGame('k')">카타카나 퀴즈</button>
-                <button class="btn-game" onclick="startGame('ai')">AI 실생활 생존 일본어</button>
-            </div>
+            <h2 style="text-align:center; margin-top:0;">실전 퀴즈</h2>
+            <button class="btn-game" onclick="startGame('h')">히라가나 뜻 맞히기</button>
+            <button class="btn-game" onclick="startGame('k')">카타카나 뜻 맞히기</button>
+            <button class="btn-game" onclick="startGame('ai')">AI 실생활 생존 일본어</button>
         </div>
         <div id="game-play" class="card hidden">
-            <div id="quiz-loading" class="loading hidden"><i class="fas fa-spinner fa-spin"></i> 현지 단어를 가져오는 중...</div>
+            <div id="quiz-loading" class="loading hidden"><i class="fas fa-spinner fa-spin"></i> 문제를 생성 중...</div>
             <div id="quiz-content">
                 <div id="quiz-q" class="quiz-q">?</div>
                 <div id="quiz-options" class="choice-grid"></div>
@@ -76,11 +71,10 @@
         </div>
     </div>
 
-    <!-- AI 번역 페이지 -->
     <div id="page-ai" class="page-content hidden">
         <div class="card">
             <h3 style="margin-top:0;">AI 실생활 튜터</h3>
-            <textarea id="ai-input" placeholder="번역이나 궁금한 표현을 입력하세요."></textarea>
+            <textarea id="ai-input" placeholder="번역하고 싶은 문장을 입력하세요."></textarea>
             <button class="btn-ai" onclick="askAI()">번역 및 분석</button>
         </div>
         <div id="ai-loading" class="loading hidden"><i class="fas fa-spinner fa-spin"></i> 분석 중...</div>
@@ -103,13 +97,16 @@
 
 <script>
     const kana = {
-        h: [{k:'あ',p:'아'},{k:'い',p:'이'},{k:'う',p:'우'},{k:'え',p:'에'},{k:'お',p:'오'},{k:'か',p:'카'},{k:'き',p:'키'},{k:'く',p:'쿠'},{k:'け',p:'케'},{k:'こ',p:'코'},{k:'さ',p:'사'},{k:'し',p:'시'},{k:'す',p:'스'},{k:'せ',p:'세'},{k:'そ',p:'소'},{k:'た',p:'타'},{k:'ち',p:'치'},{k:'つ',p:'츠'},{k:'て',p:'테'},{k:'と',p:'토'},{k:'な',p:'나'},{k:'に',p:'니'},{k:'ぬ',p:'누'},{k:'ね',p:'네'},{k:'の',p:'노'},{k:'は',p:'하'},{k:'ひ',p:'히'},{k:'ふ',p:'후'},{k:'へ',p:'헤'},{k:'ほ',p:'호'},{k:'ま',p:'마'},{k:'み',p:'미'},{k:'む',p:'무'},{k:'め',p:'메'},{k:'も',p:'모'},{k:'や',p:'야'},{k:'ゆ',p:'유'},{k:'よ',p:'요'},{k:'ら',p:'라'},{k:'り',p:'리'},{k:'る',p:'루'},{k:'れ',p:'레'},{k:'ろ',p:'로'},{k:'わ',p:'와'},{k:'을',p:'오'},{k:'ん',p:'응'}],
-        k: [{k:'ア',p:'아'},{k:'イ',p:'이'},{k:'ウ',p:'우'},{k:'エ',p:'에'},{k:'オ',p:'오'},{k:'カ',p:'카'},{k:'キ',p:'키'},{k:'ク',p:'쿠'},{k:'ケ',p:'케'},{k:'コ',p:'코'},{k:'サ',p:'사'},{k:'シ',p:'시'},{k:'ス',p:'스'},{k:'セ',p:'세'},{k:'ソ',p:'소'},{k:'タ',p:'타'},{k:'チ',p:'치'},{k:'ツ',p:'츠'},{k:'テ',p:'테'},{k:'ト',p:'토'},{k:'ナ',p:'나'},{k:'ニ',p:'니'},{k:'ヌ',p:'누'},{k:'ネ',p:'네'},{k:'노',p:'노'},{k:'ハ',p:'하'},{k:'ヒ',p:'히'},{k:'フ',p:'후'},{k:'ヘ',p:'헤'},{k:'ホ',p:'호'},{k:'マ',p:'마'},{k:'ミ',p:'미'},{k:'ム',p:'무'},{k:'メ',p:'메'},{k:'モ',p:'모'},{k:'ヤ',p:'야'},{k:'ユ',p:'유'},{k:'ヨ',p:'요'},{k:'ラ',p:'라'},{k:'리',p:'리'},{k:'ル',p:'루'},{k:'레',p:'레'},{k:'로',p:'로'},{k:'ワ',p:'와'},{k:'ヲ',p:'오'},{k:'ン',p:'응'}]
+        h: [{k:'あ',p:'아'},{k:'い',p:'이'},{k:'う',p:'우'},{k:'え',p:'에'},{k:'お',p:'오'},{k:'か',p:'카'},{k:'き',p:'키'},{k:'く',p:'쿠'},{k:'け',p:'케'},{k:'こ',p:'코'},{k:'さ',p:'사'},{k:'し',p:'시'},{k:'す',p:'스'},{k:'せ',p:'세'},{k:'そ',p:'소'},{k:'た',p:'타'},{k:'ち',p:'치'},{k:'つ',p:'츠'},{k:'て',p:'테'},{k:'と',p:'토'},{k:'な',p:'나'},{k:'に',p:'니'},{k:'ぬ',p:'누'},{k:'ね',p:'네'},{k:'の',p:'노'},{k:'は',p:'하'},{k:'ひ',p:'히'},{k:'ふ',p:'후'},{k:'へ',p:'헤'},{k:'ほ',p:'호'},{k:'ま',p:'마'},{k:'み',p:'미'},{k:'む',p:'무'},{k:'め',p:'메'},{k:'も',p:'모'},{k:'や',p:'야'},{k:'ゆ',p:'유'},{k:'よ',p:'요'},{k:'ら',p:'라'},{k:'り',p:'리'},{k:'る',p:'루'},{k:'れ',p:'레'},{k:'ろ',p:'로'},{k:'わ',p:'와'},{k:'を',p:'오'},{k:'ん',p:'응'}],
+        k: [{k:'ア',p:'아'},{k:'イ',p:'이'},{k:'ウ',p:'우'},{k:'エ',p:'에'},{k:'オ',p:'오'},{k:'カ',p:'카'},{k:'キ',p:'키'},{k:'ク',p:'쿠'},{k:'ケ',p:'케'},{k:'コ',p:'코'},{k:'サ',p:'사'},{k:'シ',p:'시'},{k:'스',p:'스'},{k:'セ',p:'세'},{k:'ソ',p:'소'},{k:'タ',p:'타'},{k:'チ',p:'치'},{k:'ツ',p:'츠'},{k:'テ',p:'테'},{k:'ト',p:'토'},{k:'ナ',p:'나'},{k:'ニ',p:'니'},{k:'ヌ',p:'누'},{k:'ネ',p:'네'},{k:'ノ',p:'노'},{k:'ハ',p:'하'},{k:'ヒ',p:'히'},{k:'フ',p:'후'},{k:'ヘ',p:'헤'},{k:'ホ',p:'호'},{k:'マ',p:'마'},{k:'ミ',p:'미'},{k:'ム',p:'무'},{k:'メ',p:'메'},{k:'モ',p:'모'},{k:'야',p:'야'},{k:'ユ',p:'유'},{k:'ヨ',p:'요'},{k:'ラ',p:'라'},{k:'리',p:'리'},{k:'ル',p:'루'},{k:'레',p:'레'},{k:'로',p:'로'},{k:'ワ',p:'와'},{k:'ヲ',p:'오'},{k:'ン',p:'응'}]
     };
 
     let score = 0;
     let currentGameMode = 'h';
     let currentQuizItem = null;
+
+    // AI 모드 시 사용할 오답용 가짜 뜻 리스트
+    const fakeMeanings = ["사과", "물", "화장실", "어디", "얼마", "감사합니다", "계산서", "편의점", "출구", "입구", "실례합니다", "맥주", "역", "호텔", "예약", "오른쪽", "왼쪽", "직진", "정지", "도와주세요"];
 
     function nav(p, el) {
         document.querySelectorAll('.page-content').forEach(c => c.classList.add('hidden'));
@@ -160,7 +157,6 @@
         const loader = document.getElementById('quiz-loading');
         const qText = document.getElementById('quiz-q');
         const optsArea = document.getElementById('quiz-options');
-        
         optsArea.innerHTML = '';
         
         if (currentGameMode === 'ai') {
@@ -175,25 +171,33 @@
                 const parts = dataRes.text.split('|');
                 currentQuizItem = { k: parts[0], p: parts[1], m: parts[2] };
             } catch(e) {
-                alert("AI 로딩 실패. 히라가나 모드로 전환합니다.");
-                startGame('h'); return;
+                alert("AI 로딩 실패");
+                exitGame(); return;
             }
             loader.classList.add('hidden');
             content.classList.remove('hidden');
         } else {
             const source = kana[currentGameMode];
             const item = source[Math.floor(Math.random() * source.length)];
-            currentQuizItem = { k: item.k, p: item.p, m: item.p };
+            currentQuizItem = { k: item.k, p: item.p, m: item.p }; // 카나 모드는 발음이 곧 뜻
         }
 
         qText.innerText = currentQuizItem.k;
+        let correctAnswer = currentQuizItem.m;
+        let choices = [correctAnswer];
 
-        // 선택지 생성
-        let choices = [currentQuizItem.p];
-        const allPron = [...kana.h, ...kana.k].map(i => i.p);
-        while(choices.length < 4) {
-            let r = allPron[Math.floor(Math.random() * allPron.length)];
-            if(!choices.includes(r)) choices.push(r);
+        // 오답 채우기
+        if (currentGameMode === 'ai') {
+            while(choices.length < 4) {
+                let r = fakeMeanings[Math.floor(Math.random() * fakeMeanings.length)];
+                if(!choices.includes(r)) choices.push(r);
+            }
+        } else {
+            const allPron = [...kana.h, ...kana.k].map(i => i.p);
+            while(choices.length < 4) {
+                let r = allPron[Math.floor(Math.random() * allPron.length)];
+                if(!choices.includes(r)) choices.push(r);
+            }
         }
         choices.sort(() => Math.random() - 0.5);
 
@@ -202,7 +206,7 @@
             b.className = 'choice-btn';
             b.innerText = c;
             b.onclick = () => {
-                if(c === currentQuizItem.p) {
+                if(c === correctAnswer) {
                     b.classList.add('correct');
                     score += 10;
                     document.getElementById('score-display').innerText = `SCORE: ${score}`;
@@ -223,7 +227,6 @@
         const resBox = document.getElementById('ai-result');
         resBox.classList.add('hidden');
         loader.classList.remove('hidden');
-
         try {
             const res = await fetch('/.netlify/functions/openai', { 
                 method: 'POST', 
@@ -233,7 +236,7 @@
             const parts = dataRes.text.split('|');
             document.getElementById('res-ja').innerText = parts[0];
             document.getElementById('res-pron').innerText = parts[1];
-            document.getElementById('res-mean').innerText = parts[2] || '실생활 표현 번역 완료';
+            document.getElementById('res-mean').innerText = parts[2] || '실생활 분석 완료';
             loader.classList.add('hidden');
             resBox.classList.remove('hidden');
             speak(parts[0]);
@@ -243,12 +246,8 @@
         }
     }
 
-    function speakResult() {
-        speak(document.getElementById('res-ja').innerText);
-    }
-
+    function speakResult() { speak(document.getElementById('res-ja').innerText); }
     renderStudy('h');
 </script>
 </body>
 </html>
-
