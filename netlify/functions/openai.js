@@ -8,9 +8,7 @@ exports.handler = async (event) => {
 
     let prompt = "";
     if (mode === 'word_game') {
-        // 실생활 테마(식당, 교통, 쇼핑, 인사, 응급상황 등) 강조
         prompt = `Generate ONE highly practical Japanese word or very short phrase used in real-life situations (Travel, Dining, Shopping, Daily Conversation). 
-        Focus on words that a traveler would actually use.
         Format: Word|KoreanPronunciation|Meaning
         Example: すみません|스미마센|저기요/죄송합니다
         Strictly output ONLY the string. No quotes, no markdown.`;
@@ -44,7 +42,7 @@ exports.handler = async (event) => {
                 try {
                     const response = JSON.parse(resBody);
                     let text = response.choices[0].message.content.trim();
-                    text = text.replace(/[`"']/g, ""); // 불필요한 따옴표 제거
+                    text = text.replace(/[`"']/g, ""); 
                     resolve({ statusCode: 200, body: JSON.stringify({ text }) });
                 } catch (e) {
                     resolve({ statusCode: 500, body: JSON.stringify({ text: "오류|오류|응답 오류" }) });
